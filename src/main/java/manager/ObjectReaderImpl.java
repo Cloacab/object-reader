@@ -51,7 +51,6 @@ public class ObjectReaderImpl implements ObjectReader {
             }
         }
 //        objectConfigurator.configure(t, args.toArray());
-        System.out.println(args);
         return t;
     }
 
@@ -87,7 +86,7 @@ public class ObjectReaderImpl implements ObjectReader {
 //        validate() done
 //        cast() ??????????????
 
-        Object castedUserInput = null;
+        T castedUserInput = null;
         if (field.getType().isAnnotationPresent(CustomClass.class)) {
             return (T) readObject(field.getType());
         }
@@ -110,9 +109,9 @@ public class ObjectReaderImpl implements ObjectReader {
 
             if (validate(rules, userInput)) flag = false;
             // cast user input
-            castedUserInput = cast(userInput, field, type);
+            castedUserInput = (T) cast(userInput, field, type);
         } while(flag && !userInput.trim().equalsIgnoreCase("break"));
-        return (T) userInput;
+        return castedUserInput;
     }
 
     private String formMessage(List<Rule> rules, Field field) {
@@ -121,7 +120,7 @@ public class ObjectReaderImpl implements ObjectReader {
         StringBuilder message = new StringBuilder();
         message.append("Enter ")
                 .append(field.getName())
-                .append(!rules.isEmpty() ? ("(Rules: " + ruleMessage + ")") : "")
+                .append(!rules.isEmpty() ? (" (Rules: " + ruleMessage + ")") : "")
                 .append(field.getType().isEnum() ? (", (Possible variants: " + (Arrays.toString(field.getType().getEnumConstants()) + ")")) : "")
                 .append(":")
                 .append("\n");
@@ -130,10 +129,14 @@ public class ObjectReaderImpl implements ObjectReader {
     }
 
     private Object cast(String userInput, Field field, Class type) {
+        if (String.class.equals(type)) {
+            return userInput;
+        }
         if (type.isEnum()) {
             return fromStringToEnum(userInput, type);
         } else {
-            Convertor<?> converter = ConvertorFactory.getConverter(type);
+            ConvertorFactory factory = new ConvertorFactory();
+            Convertor<?> converter = factory.getConverter(type);
             return converter.convert(userInput, type);
         }
     }

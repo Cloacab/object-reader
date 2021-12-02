@@ -9,7 +9,7 @@ import java.io.Serializable;
 @CustomClass
 public class Coordinates implements Serializable {
     @UserInput
-    @Rules(value = {"XCoordinateRule"})
+    @Rules(value = {"rules.XCoordinateRule"})
     private long x; //Максимальное значение поля: 411
     @UserInput
     private float y;

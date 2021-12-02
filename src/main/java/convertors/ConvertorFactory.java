@@ -58,11 +58,8 @@ public class ConvertorFactory {
         return null;
     }
 
-    public static Convertor getConverter(Class<?> type) {
-        if (type.isEnum()) {
-            return getEnum(type);
-        }
-        return null;
+    public Convertor getConverter(Class<?> type) {
+        return typeToConvertorMap.getOrDefault(type, null);
     }
 
     private static <T extends Enum<T>> Convertor<T> getEnum(Class<?> type) {

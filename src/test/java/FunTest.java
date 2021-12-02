@@ -1,6 +1,7 @@
 import convertors.ConvertorFactory;
 import convertors.Convertor;
 import convertors.StringToFloatConvertor;
+import lombok.SneakyThrows;
 import manager.ObjectReader;
 import manager.ObjectReaderImpl;
 import org.junit.jupiter.api.Test;
@@ -61,9 +62,9 @@ public class FunTest {
 
     @Test
     public void test6() {
-        Convertor converter = ConvertorFactory.getConverter(Weapon.class);
-        assert converter != null;
-        System.out.println(converter.getTypeOf());
+//        Convertor converter = ConvertorFactory.getConverter(Weapon.class);
+//        assert converter != null;
+//        System.out.println(converter.getTypeOf());
     }
 
     @Test
@@ -78,9 +79,9 @@ public class FunTest {
     @Test
     public void test8() {
         ObjectReaderImpl reader = new ObjectReaderImpl();
-        reader.scanObject(SpaceMarine.class);
-//        Object o = reader.readObject(SpaceMarine.class);
-//        System.out.println(o);
+//        reader.scanObject(SpaceMarine.class);
+        Object o = reader.readObject(SpaceMarine.class);
+        System.out.println(o);
     }
 
     @Test
@@ -89,6 +90,26 @@ public class FunTest {
         map.computeIfAbsent(1, k-> new HashSet<>()).add("sdhi");
         map.computeIfAbsent(1, k -> new HashSet<>()).add("sdhi");
         System.out.println(map);
+    }
+
+    @Test
+    @SneakyThrows
+    public void test10() {
+        Convertor o = (Convertor) Class.forName("convertors.StringToFloatConvertor").getDeclaredConstructor().newInstance();
+        Float convert = (Float) o.convert("0.45", Float.class);
+        System.out.println(convert);
+
+        Reflections scanner = new Reflections("convertors");
+        Set<Class<? extends Convertor>> types = scanner.getSubTypesOf(Convertor.class);
+        Convertor convertor = types.iterator().next().getDeclaredConstructor().newInstance();
+        System.out.println(convertor.getTypeOf());
+        convert = (Float) convertor.convert("0.45", Float.class);
+        System.out.println(convert);
+    }
+
+    @Test
+    public void test11() {
+        System.out.println(String.class.equals(String.class));
     }
 
 }
