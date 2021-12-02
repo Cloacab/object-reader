@@ -1,24 +1,32 @@
 package manager;
 
-import annotations.AnnotationProcessor;
 import annotations.UserInput;
+import context.InjectByType;
+import context.Singleton;
 import convertors.Convertor;
-import convertors.ConvertorFactory;
-import lombok.Getter;
+import convertors.ConvertorFactoryIfc;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import model.CustomClass;
 import rules.Rule;
 import rules.Rules;
 
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 
+@Singleton
 public class ObjectReaderImpl implements ObjectReader {
+
+    @InjectByType
+    private ConvertorFactoryIfc factory;
+    @InjectByType
+    private ObjectCreatorIfc creator;
 
     public static boolean INTERACTIVE_MODE = true;
     public final static Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<Class<?>, Class<?>>();
+
     static {
         PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
         PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
@@ -32,14 +40,9 @@ public class ObjectReaderImpl implements ObjectReader {
 
     @Setter
     private Scanner scanner = new Scanner(System.in);
-    private ConvertorFactory factory = new ConvertorFactory();
-//    private ObjectConfigurator objectConfigurator = new ObjectConfiguratorImpl();
-    private AnnotationProcessor rulesAnnotationProcessor;
-    private Object configuringObject;
-    private final HashMap<String, Class<?>> nameToTypeMap = new HashMap<>();
+    @Setter
+    private InputStream inputStream;
     private final HashMap<Class<?>, Set<Field>> typeToArgTypesMap = new HashMap<>();
-    @Getter
-    private List<Field> filedsToRead = new ArrayList<>();
 
     public ObjectReaderImpl() {
 
@@ -48,36 +51,31 @@ public class ObjectReaderImpl implements ObjectReader {
     @SneakyThrows
     @Override
     public Object readObject(Class<?> type) {
-        if (!type.isAnnotationPresent(CustomClass.class)) throw new RuntimeException("Class is not annotated by CustomClass annotation.");
+        if (!type.isAnnotationPresent(CustomClass.class))
+            throw new RuntimeException("Class is not annotated by CustomClass annotation.");
         // scan object structure and all of its subclasses marked with CustomClass annotation.
         scanObject(type);
 
-        Object t = type.getDeclaredConstructor().newInstance();
-        configuringObject = t;
-        
         ArrayList<Object> args = new ArrayList<>();
         for (Field field : type.getDeclaredFields()) {
-            if (field.isAnnotationPresent(UserInput.class)){
-                nameToTypeMap.put(field.getName(), field.getType());
+            if (field.isAnnotationPresent(UserInput.class)) {
                 args.add(readField(field, field.getType()));
             }
         }
         List<Class<?>> arguments = new ArrayList<>();
         typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
         Constructor<?> constructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
-        t = ObjectConfiguratorImpl.configure(constructor, args.toArray());
-        return t;
+        return creator.create(constructor, args.toArray());
     }
 
     public void scanObject(Class<?> type) {
         if (!type.isAnnotationPresent(CustomClass.class)) return;
 
         for (Field field : type.getDeclaredFields()) {
-            if (field.getType().isAnnotationPresent(CustomClass.class)){
+            if (field.getType().isAnnotationPresent(CustomClass.class)) {
                 scanObject(field.getType());
             }
             if (field.isAnnotationPresent(UserInput.class)) {
-                filedsToRead.add(field);
                 typeToArgTypesMap.computeIfAbsent(type, k -> new LinkedHashSet<>()).add(field);
             }
         }
@@ -94,12 +92,6 @@ public class ObjectReaderImpl implements ObjectReader {
     @SneakyThrows
     private <T> T readField(Field field, Class<T> type) {
 
-//        getRules() done
-//        input() done
-//        validate() done
-//        cast() done)))
-
-        T castedUserInput = null;
         if (field.getType().isAnnotationPresent(CustomClass.class)) {
             return (T) readObject(field.getType());
         }
@@ -113,6 +105,7 @@ public class ObjectReaderImpl implements ObjectReader {
         // read field until it properly validates
         String userInput;
         boolean flag = true;
+        T castedUserInput = null;
 
         do {
             print(message);
@@ -123,12 +116,12 @@ public class ObjectReaderImpl implements ObjectReader {
             // cast user input
             castedUserInput = (T) cast(userInput, field, type);
 
-        } while(flag && !userInput.trim().equalsIgnoreCase("break"));
+        } while (flag && !userInput.trim().equalsIgnoreCase("break"));
         return castedUserInput;
     }
 
     private void print(String message) {
-        if (INTERACTIVE_MODE){
+        if (INTERACTIVE_MODE) {
             System.out.print(message);
         }
     }
@@ -159,7 +152,7 @@ public class ObjectReaderImpl implements ObjectReader {
         if (type.isEnum()) {
             return fromStringToEnum(userInput, type);
         } else {
-            Convertor<?> converter = factory.getConverter(type);
+            Convertor<?> converter = factory.getConvertor(type);
             return converter.convert(userInput, type);
         }
     }

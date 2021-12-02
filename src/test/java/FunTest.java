@@ -24,9 +24,9 @@ public class FunTest {
 
     @Test
     public void test2() {
-        ConvertorFactory factory = new ConvertorFactory();
-        Integer exactConvertor = factory.getExactConvertor(Integer.class, "34");
-        System.out.println(exactConvertor);
+//        ConvertorFactory factory = new ConvertorFactory();
+//        Integer exactConvertor = factory.getExactConvertor(Integer.class, "34");
+//        System.out.println(exactConvertor);
     }
 
     @Test
