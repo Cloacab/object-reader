@@ -6,10 +6,10 @@ import java.lang.reflect.ParameterizedType;
 
 public abstract class Convertor<T> {
     @Getter
-    protected Class typeOf = null;
+    protected Class<T> typeOf = null;
 
     public Convertor() {
-        this.typeOf = (Class)
+        this.typeOf = (Class<T>)
                 ((ParameterizedType)getClass()
                         .getGenericSuperclass())
                         .getActualTypeArguments()[0];

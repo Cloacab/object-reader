@@ -15,26 +15,34 @@ public class ConvertorFactory {
 
     private final List<Convertor> convertors = new ArrayList<>();
     @Getter
-    private final Map<Class, Convertor<?>> typeToConvertorMap = new HashMap<>();
+    private final Map<Class<?>, Convertor<?>> typeToConvertorMap = new HashMap<>();
 
+    @SneakyThrows
     public ConvertorFactory() {
         Reflections scanner = new Reflections("convertors");
         Set<Class<? extends Convertor>> types = scanner.getSubTypesOf(Convertor.class);
-        types.forEach(x -> {
-            try {
-                Convertor convertor = x.getDeclaredConstructor().newInstance();
-                convertors.add(convertor);
-                typeToConvertorMap.put(convertor.getTypeOf(), convertor);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        });
+        Iterator<Class<? extends Convertor>> it = types.iterator();
+        while (it.hasNext()) {
+            Class<? extends Convertor> next = it.next();
+            Convertor convertor = next.getDeclaredConstructor().newInstance();
+            convertors.add(convertor);
+            typeToConvertorMap.put(convertor.getTypeOf(), convertor);
+        }
+//        types.forEach(x -> {
+//            try {
+//                Convertor convertor = x.getDeclaredConstructor().newInstance();
+//                convertors.add(convertor);
+//                typeToConvertorMap.put(convertor.getTypeOf(), convertor);
+//            } catch (InstantiationException e) {
+//                e.printStackTrace();
+//            } catch (IllegalAccessException e) {
+//                e.printStackTrace();
+//            } catch (InvocationTargetException e) {
+//                e.printStackTrace();
+//            } catch (NoSuchMethodException e) {
+//                e.printStackTrace();
+//            }
+//        });
     }
 
     public void configureFactory(Field[] fields) {
@@ -62,15 +70,15 @@ public class ConvertorFactory {
         return typeToConvertorMap.getOrDefault(type, null);
     }
 
-    private static <T extends Enum<T>> Convertor<T> getEnum(Class<?> type) {
-        return new Convertor<T>() {
-            @Override
-            public T convert(String value, Class<T> type) {
-                Enum.valueOf(type, value);
-                return (T) Enum.valueOf(type, value);
-            }
-        };
-    }
+//    private static <T extends Enum<T>> Convertor<T> getEnum(Class<?> type) {
+//        return new Convertor<T>() {
+//            @Override
+//            public T convert(String value, Class<T> type) {
+//                Enum.valueOf(type, value);
+//                return (T) Enum.valueOf(type, value);
+//            }
+//        };
+//    }
 
     public <T> T getExactConvertor(Class<T> targetType, String targetValue) {
 //        Type

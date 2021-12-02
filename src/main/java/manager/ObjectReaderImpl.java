@@ -18,9 +18,21 @@ import java.util.*;
 public class ObjectReaderImpl implements ObjectReader {
 
     public static boolean INTERACTIVE_MODE = true;
+    public final static Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<Class<?>, Class<?>>();
+    static {
+        PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
+        PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
+        PRIMITIVE_TO_WRAPPER.put(short.class, Short.class);
+        PRIMITIVE_TO_WRAPPER.put(char.class, Character.class);
+        PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);
+        PRIMITIVE_TO_WRAPPER.put(long.class, Long.class);
+        PRIMITIVE_TO_WRAPPER.put(float.class, Float.class);
+        PRIMITIVE_TO_WRAPPER.put(double.class, Double.class);
+    }
 
     @Setter
     private Scanner scanner = new Scanner(System.in);
+    private ConvertorFactory factory = new ConvertorFactory();
     private ObjectConfigurator objectConfigurator;
     private AnnotationProcessor rulesAnnotationProcessor;
     private Object configuringObject;
@@ -67,8 +79,6 @@ public class ObjectReaderImpl implements ObjectReader {
             }
         }
 
-        System.out.println(typeToArgTypesMap);
-
         try {
             List<Class<?>> arguments = new ArrayList<>();
             typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
@@ -76,6 +86,8 @@ public class ObjectReaderImpl implements ObjectReader {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Your custom class should have constructor, that contains all 'UserInput' annotated fields as parameters. Problem occurs in class: " + type.getName());
         }
+
+        System.out.println(factory.getTypeToConvertorMap());
     }
 
     @SneakyThrows
@@ -99,19 +111,25 @@ public class ObjectReaderImpl implements ObjectReader {
 
         // read field until it properly validates
         String userInput;
-        boolean flag = false;
+        boolean flag = true;
 
         do {
-            if (INTERACTIVE_MODE) {
-                System.out.print(message);
-            }
+            print(message);
             userInput = scanner.nextLine();
 
             if (validate(rules, userInput)) flag = false;
+            if (flag) print("Seems like your input doesn't match rules");
             // cast user input
             castedUserInput = (T) cast(userInput, field, type);
+
         } while(flag && !userInput.trim().equalsIgnoreCase("break"));
         return castedUserInput;
+    }
+
+    private void print(String message) {
+        if (INTERACTIVE_MODE){
+            System.out.println(message);
+        }
     }
 
     private String formMessage(List<Rule> rules, Field field) {
@@ -129,13 +147,15 @@ public class ObjectReaderImpl implements ObjectReader {
     }
 
     private Object cast(String userInput, Field field, Class type) {
+        if (type.isPrimitive()) {
+            type = PRIMITIVE_TO_WRAPPER.get(type);
+        }
         if (String.class.equals(type)) {
             return userInput;
         }
         if (type.isEnum()) {
             return fromStringToEnum(userInput, type);
         } else {
-            ConvertorFactory factory = new ConvertorFactory();
             Convertor<?> converter = factory.getConverter(type);
             return converter.convert(userInput, type);
         }

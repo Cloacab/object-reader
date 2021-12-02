@@ -101,6 +101,7 @@ public class FunTest {
 
         Reflections scanner = new Reflections("convertors");
         Set<Class<? extends Convertor>> types = scanner.getSubTypesOf(Convertor.class);
+        System.out.println(types);
         Convertor convertor = types.iterator().next().getDeclaredConstructor().newInstance();
         System.out.println(convertor.getTypeOf());
         convert = (Float) convertor.convert("0.45", Float.class);
@@ -109,7 +110,7 @@ public class FunTest {
 
     @Test
     public void test11() {
-        System.out.println(String.class.equals(String.class));
+        System.out.println(int.class.getGenericSuperclass());
     }
 
 }
