@@ -1,10 +1,13 @@
 package manager;
 
-public class ObjectConfiguratorImpl implements ObjectConfigurator {
+import lombok.SneakyThrows;
 
-    @Override
-    public Object configure(Object object, Object[] args) {
+import java.lang.reflect.Constructor;
 
-        return null;
+public class ObjectConfiguratorImpl {
+
+    @SneakyThrows
+    public static <T> T configure(Constructor<T> constructor, Object[] args) {
+        return constructor.newInstance(args);
     }
 }

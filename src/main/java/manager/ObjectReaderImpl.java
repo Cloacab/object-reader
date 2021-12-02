@@ -33,7 +33,7 @@ public class ObjectReaderImpl implements ObjectReader {
     @Setter
     private Scanner scanner = new Scanner(System.in);
     private ConvertorFactory factory = new ConvertorFactory();
-    private ObjectConfigurator objectConfigurator;
+//    private ObjectConfigurator objectConfigurator = new ObjectConfiguratorImpl();
     private AnnotationProcessor rulesAnnotationProcessor;
     private Object configuringObject;
     private final HashMap<String, Class<?>> nameToTypeMap = new HashMap<>();
@@ -62,7 +62,10 @@ public class ObjectReaderImpl implements ObjectReader {
                 args.add(readField(field, field.getType()));
             }
         }
-//        objectConfigurator.configure(t, args.toArray());
+        List<Class<?>> arguments = new ArrayList<>();
+        typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
+        Constructor<?> constructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
+        t = ObjectConfiguratorImpl.configure(constructor, args.toArray());
         return t;
     }
 
@@ -82,21 +85,19 @@ public class ObjectReaderImpl implements ObjectReader {
         try {
             List<Class<?>> arguments = new ArrayList<>();
             typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
-            Constructor<?> declaredConstructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
+            type.getDeclaredConstructor(arguments.toArray(new Class[0]));
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Your custom class should have constructor, that contains all 'UserInput' annotated fields as parameters. Problem occurs in class: " + type.getName());
         }
-
-        System.out.println(factory.getTypeToConvertorMap());
     }
 
     @SneakyThrows
     private <T> T readField(Field field, Class<T> type) {
 
 //        getRules() done
-//        scan() done
+//        input() done
 //        validate() done
-//        cast() ??????????????
+//        cast() done)))
 
         T castedUserInput = null;
         if (field.getType().isAnnotationPresent(CustomClass.class)) {
@@ -118,7 +119,7 @@ public class ObjectReaderImpl implements ObjectReader {
             userInput = scanner.nextLine();
 
             if (validate(rules, userInput)) flag = false;
-            if (flag) print("Seems like your input doesn't match rules");
+            if (flag) print("Seems like your input doesn't match rules, try again.\n");
             // cast user input
             castedUserInput = (T) cast(userInput, field, type);
 
@@ -128,7 +129,7 @@ public class ObjectReaderImpl implements ObjectReader {
 
     private void print(String message) {
         if (INTERACTIVE_MODE){
-            System.out.println(message);
+            System.out.print(message);
         }
     }
 
@@ -137,6 +138,8 @@ public class ObjectReaderImpl implements ObjectReader {
         rules.forEach(r -> ruleMessage.append(r.getDescription()).append(" "));
         StringBuilder message = new StringBuilder();
         message.append("Enter ")
+                .append(field.getDeclaringClass().getSimpleName())
+                .append(" ")
                 .append(field.getName())
                 .append(!rules.isEmpty() ? (" (Rules: " + ruleMessage + ")") : "")
                 .append(field.getType().isEnum() ? (", (Possible variants: " + (Arrays.toString(field.getType().getEnumConstants()) + ")")) : "")
