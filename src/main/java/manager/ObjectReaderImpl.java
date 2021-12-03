@@ -89,7 +89,7 @@ public class ObjectReaderImpl implements ObjectReader {
         }
     }
 
-    @SneakyThrows
+//    @SneakyThrows
     private <T> T readField(Field field, Class<T> type) {
 
         if (field.getType().isAnnotationPresent(CustomClass.class)) {
@@ -111,10 +111,22 @@ public class ObjectReaderImpl implements ObjectReader {
             print(message);
             userInput = scanner.nextLine();
 
-            if (validate(rules, userInput)) flag = false;
+            try {
+                if (validate(rules, userInput)) {
+                    flag = false;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println(e.getMessage());
+                flag = true;
+            }
             if (flag) print("Seems like your input doesn't match rules, try again.\n");
             // cast user input
-            castedUserInput = (T) cast(userInput, field, type);
+            try {
+                castedUserInput = (T) cast(userInput, field, type);
+            } catch (NotFoundEnumTypeException | TypeCastException e) {
+                System.err.println(e.getMessage());
+                flag = true;
+            }
 
         } while (flag && !userInput.trim().equalsIgnoreCase("break"));
         return castedUserInput;
@@ -153,11 +165,15 @@ public class ObjectReaderImpl implements ObjectReader {
             return fromStringToEnum(userInput, type);
         } else {
             Convertor<?> converter = factory.getConvertor(type);
-            return converter.convert(userInput, type);
+            try{
+                return converter.convert(userInput, type);
+            } catch (Exception e) {
+                throw new TypeCastException(String.format("Mismatching field type and input type. Must be: %s", field.getType().getSimpleName()));
+            }
         }
     }
 
-    @SneakyThrows
+//    @SneakyThrows
     private <Q extends Enum<Q>> Q fromStringToEnum(Object str, Class<Q> enm) {
         try {
             return (Q) Enum.valueOf(enm, str.toString());
