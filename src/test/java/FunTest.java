@@ -1,13 +1,10 @@
-import convertors.ConvertorFactory;
 import convertors.Convertor;
 import convertors.StringToFloatConvertor;
 import lombok.SneakyThrows;
-import manager.ObjectReader;
 import manager.ObjectReaderImpl;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import testObject.SpaceMarine;
-import testObject.Weapon;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -24,7 +21,7 @@ public class FunTest {
 
     @Test
     public void test2() {
-//        ConvertorFactory factory = new ConvertorFactory();
+//        ConvertorFactoryImpl factory = new ConvertorFactoryImpl();
 //        Integer exactConvertor = factory.getExactConvertor(Integer.class, "34");
 //        System.out.println(exactConvertor);
     }
@@ -54,15 +51,15 @@ public class FunTest {
 //    @Test
 //    public void test5() {
 //        StringToEnumConvertor<Weapon> convertor1 = new StringToEnumConvertor<>();
-//        Convertor<Float> convertor = ConvertorFactory.getConvertor(StringToFloatConvertor.class);
-////        ConvertorFactory.getConvertor(Class<StringToFloatConvertor>);
-//        Convertor<Weapon> convertor2 = ConvertorFactory.getConvertor((Class<StringToEnumConvertor<Weapon>>) convertor1.getClass());
+//        Convertor<Float> convertor = ConvertorFactoryImpl.getConvertor(StringToFloatConvertor.class);
+////        ConvertorFactoryImpl.getConvertor(Class<StringToFloatConvertor>);
+//        Convertor<Weapon> convertor2 = ConvertorFactoryImpl.getConvertor((Class<StringToEnumConvertor<Weapon>>) convertor1.getClass());
 //        System.out.println(convertor2.convert("BOLT_RIFLE", Weapon.class));
 //    }
 
     @Test
     public void test6() {
-//        Convertor converter = ConvertorFactory.getConverter(Weapon.class);
+//        Convertor converter = ConvertorFactoryImpl.getConverter(Weapon.class);
 //        assert converter != null;
 //        System.out.println(converter.getTypeOf());
     }

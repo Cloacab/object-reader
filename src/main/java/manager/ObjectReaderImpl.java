@@ -4,7 +4,7 @@ import annotations.UserInput;
 import context.InjectByType;
 import context.Singleton;
 import convertors.Convertor;
-import convertors.ConvertorFactoryIfc;
+import convertors.ConvertorFactory;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import model.CustomClass;
@@ -19,34 +19,16 @@ import java.util.*;
 @Singleton
 public class ObjectReaderImpl implements ObjectReader {
 
-    @InjectByType
-    private ConvertorFactoryIfc factory;
-    @InjectByType
-    private ObjectCreatorIfc creator;
+    public static boolean INTERACTIVE_MODE = false;
 
-    public static boolean INTERACTIVE_MODE = true;
-    public final static Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<Class<?>, Class<?>>();
-
-    static {
-        PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
-        PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
-        PRIMITIVE_TO_WRAPPER.put(short.class, Short.class);
-        PRIMITIVE_TO_WRAPPER.put(char.class, Character.class);
-        PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);
-        PRIMITIVE_TO_WRAPPER.put(long.class, Long.class);
-        PRIMITIVE_TO_WRAPPER.put(float.class, Float.class);
-        PRIMITIVE_TO_WRAPPER.put(double.class, Double.class);
-    }
+    @InjectByType
+    private ConvertorFactory factory;
+    @InjectByType
+    private ObjectCreator creator;
 
     @Setter
     private Scanner scanner = new Scanner(System.in);
-    @Setter
-    private InputStream inputStream;
     private final HashMap<Class<?>, Set<Field>> typeToArgTypesMap = new HashMap<>();
-
-    public ObjectReaderImpl() {
-
-    }
 
     @SneakyThrows
     @Override
@@ -66,6 +48,11 @@ public class ObjectReaderImpl implements ObjectReader {
         typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
         Constructor<?> constructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
         return creator.create(constructor, args.toArray());
+    }
+
+    @Override
+    public void setInputStream(InputStream inputStream) {
+        this.scanner = new Scanner(inputStream);
     }
 
     public void scanObject(Class<?> type) {
@@ -100,15 +87,17 @@ public class ObjectReaderImpl implements ObjectReader {
         List<Rule> rules = getRules(field);
         // form message for console
         String message = formMessage(rules, field);
-
-
         // read field until it properly validates
+        return processUserInput(field, type, rules, message);
+    }
+
+    private <T> T processUserInput(Field field, Class<T> type, List<Rule> rules, String message) {
         String userInput;
         boolean flag = true;
         T castedUserInput = null;
 
         do {
-            print(message);
+            println(message, PrintType.INFO);
             userInput = scanner.nextLine();
 
             try {
@@ -116,26 +105,32 @@ public class ObjectReaderImpl implements ObjectReader {
                     flag = false;
                 }
             } catch (NumberFormatException e) {
-                System.err.println(e.getMessage());
+                println(e.getMessage(), PrintType.ERROR);
                 flag = true;
             }
-            if (flag) print("Seems like your input doesn't match rules, try again.\n");
+            if (flag) {
+                println("Seems like your input doesn't match rules, try again.", PrintType.INFO);
+            }
             // cast user input
             try {
                 castedUserInput = (T) cast(userInput, field, type);
             } catch (NotFoundEnumTypeException | TypeCastException e) {
-                System.err.println(e.getMessage());
+                println(e.getMessage(), PrintType.ERROR);
                 flag = true;
             }
-
         } while (flag && !userInput.trim().equalsIgnoreCase("break"));
+
         return castedUserInput;
     }
 
-    private void print(String message) {
+    private void print(String message, PrintType type) {
         if (INTERACTIVE_MODE) {
-            System.out.print(message);
+            type.type.print(message);
         }
+    }
+
+    private void println(String message, PrintType type) {
+        print(message + '\n', type);
     }
 
     private String formMessage(List<Rule> rules, Field field) {
@@ -148,18 +143,14 @@ public class ObjectReaderImpl implements ObjectReader {
                 .append(field.getName())
                 .append(!rules.isEmpty() ? (" (Rules: " + ruleMessage + ")") : "")
                 .append(field.getType().isEnum() ? (", (Possible variants: " + (Arrays.toString(field.getType().getEnumConstants()) + ")")) : "")
-                .append(":")
-                .append("\n");
+                .append(":");
 
         return message.toString();
     }
 
     private Object cast(String userInput, Field field, Class type) {
         if (type.isPrimitive()) {
-            type = PRIMITIVE_TO_WRAPPER.get(type);
-        }
-        if (String.class.equals(type)) {
-            return userInput;
+            type = Wrapper.wrap(type);
         }
         if (type.isEnum()) {
             return fromStringToEnum(userInput, type);
@@ -173,12 +164,11 @@ public class ObjectReaderImpl implements ObjectReader {
         }
     }
 
-//    @SneakyThrows
-    private <Q extends Enum<Q>> Q fromStringToEnum(Object str, Class<Q> enm) {
+    private <T extends Enum<T>> T fromStringToEnum(String str, Class<T> enm) {
         try {
-            return (Q) Enum.valueOf(enm, str.toString());
+            return (T) Enum.valueOf(enm, str.toString());
         } catch (Exception e) {
-            throw new NotFoundEnumTypeException(e.getMessage());
+            throw new NotFoundEnumTypeException(e.getMessage() + '\n');
         }
     }
 
