@@ -13,6 +13,7 @@ public class SpaceMarine implements Serializable {
     private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
 
     @UserInput
+    @Rules(value = "rules.NotNullRule")
     private String name; //Поле не может быть null, Строка не может быть пустой
 
     @UserInput
@@ -20,13 +21,16 @@ public class SpaceMarine implements Serializable {
 
     private LocalDate creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     @UserInput
-    @Rules(value = "rules.XCoordinateRule")
+    @Rules(value = "rules.HealthRule")
     private long health; //Значение поля должно быть больше 0
     @UserInput
+    @Rules(value = "rules.NullableRule")
     private AstartesCategory category; //Поле может быть null
     @UserInput
+    @Rules(value = "rules.NotNullRule")
     private Weapon weaponType; //Поле не может быть null
     @UserInput
+    @Rules(value = "rules.NullableRule")
     private MeleeWeapon meleeWeapon; //Поле может быть null
     @UserInput
     private Chapter chapter; //Поле не может быть null

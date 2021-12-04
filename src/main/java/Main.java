@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         ApplicationContext context = Application.run("", new HashMap<>());
         ObjectReader reader = context.getObject(ObjectReader.class);
-        reader.setInputStream(new FileInputStream("item.txt"));
+//        reader.setInputStream(new FileInputStream("item.txt"));
         Object o = reader.readObject(SpaceMarine.class);
         System.out.println(o);
     }

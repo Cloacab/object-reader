@@ -19,7 +19,7 @@ import java.util.*;
 @Singleton
 public class ObjectReaderImpl implements ObjectReader {
 
-    public static boolean INTERACTIVE_MODE = false;
+    public static boolean INTERACTIVE_MODE = true;
 
     @InjectByType
     private ConvertorFactory factory;
@@ -114,9 +114,11 @@ public class ObjectReaderImpl implements ObjectReader {
             // cast user input
             try {
                 castedUserInput = (T) cast(userInput, field, type);
-            } catch (NotFoundEnumTypeException | TypeCastException e) {
+            } catch (TypeCastException e) {
                 println(e.getMessage(), PrintType.ERROR);
                 flag = true;
+            } catch (NotFoundEnumTypeException e) {
+                if (!flag) return null;
             }
         } while (flag && !userInput.trim().equalsIgnoreCase("break"));
 
@@ -152,6 +154,7 @@ public class ObjectReaderImpl implements ObjectReader {
         if (type.isPrimitive()) {
             type = Wrapper.wrap(type);
         }
+
         if (type.isEnum()) {
             return fromStringToEnum(userInput, type);
         } else {

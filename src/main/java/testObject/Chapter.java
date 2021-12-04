@@ -2,6 +2,7 @@ package testObject;
 
 import annotations.UserInput;
 import model.CustomClass;
+import rules.Rules;
 
 import java.io.Serializable;
 
@@ -9,8 +10,10 @@ import java.io.Serializable;
 public class Chapter implements Serializable {
 
     @UserInput
+    @Rules(value = "rules.NotNullRule")
     private String name; //Поле не может быть null, Строка не может быть пустой
     @UserInput
+    @Rules(value = "rules.NullableRule")
     private String world; //Поле может быть null
 
     public Chapter() {
