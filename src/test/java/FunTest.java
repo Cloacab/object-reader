@@ -107,7 +107,6 @@ public class FunTest {
 
     @Test
     public void test11() {
-        System.out.println(int.class.getGenericSuperclass());
+        System.out.println("null");
     }
-
 }

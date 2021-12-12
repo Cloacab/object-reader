@@ -3,6 +3,6 @@ package manager;
 import java.io.InputStream;
 
 public interface ObjectReader {
-    Object readObject(Class<?> type);
+    <T> T readObject(Class<T> type);
     void setInputStream(InputStream inputStream);
 }

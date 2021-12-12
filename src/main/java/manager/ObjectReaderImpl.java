@@ -19,12 +19,12 @@ import java.util.*;
 @Singleton
 public class ObjectReaderImpl implements ObjectReader {
 
-    public static boolean INTERACTIVE_MODE = true;
-
     @InjectByType
     private ConvertorFactory factory;
     @InjectByType
     private ObjectCreator creator;
+    @InjectByType
+    private Outputter outputter;
 
     @Setter
     private Scanner scanner = new Scanner(System.in);
@@ -32,7 +32,7 @@ public class ObjectReaderImpl implements ObjectReader {
 
     @SneakyThrows
     @Override
-    public Object readObject(Class<?> type) {
+    public <T> T readObject(Class<T> type) {
         if (!type.isAnnotationPresent(CustomClass.class))
             throw new RuntimeException("Class is not annotated by CustomClass annotation.");
         // scan object structure and all of its subclasses marked with CustomClass annotation.
@@ -46,8 +46,15 @@ public class ObjectReaderImpl implements ObjectReader {
         }
         List<Class<?>> arguments = new ArrayList<>();
         typeToArgTypesMap.get(type).forEach(f -> arguments.add(f.getType()));
-        Constructor<?> constructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
-        return creator.create(constructor, args.toArray());
+        Constructor<T> constructor = type.getDeclaredConstructor(arguments.toArray(new Class[0]));
+
+        T object = null;
+        try {
+            object = creator.create(constructor, args.toArray());
+        } catch (IllegalArgumentException e) {
+            outputter.println(e.getMessage(), PrintType.ERROR);
+        }
+        return object;
     }
 
     @Override
@@ -97,26 +104,29 @@ public class ObjectReaderImpl implements ObjectReader {
         T castedUserInput = null;
 
         do {
-            println(message, PrintType.INFO);
+            outputter.println(message, PrintType.INFO);
             userInput = scanner.nextLine();
 
             try {
                 if (validate(rules, userInput)) {
                     flag = false;
+//                    if (!outputter.isVerbose()) {
+//
+//                    }
                 }
             } catch (NumberFormatException e) {
-                println(e.getMessage(), PrintType.ERROR);
+                outputter.println(e.getMessage(), PrintType.ERROR);
                 flag = true;
             }
             if (flag) {
-                println("Seems like your input doesn't match rules, try again.", PrintType.INFO);
+                outputter.println("Seems like your input doesn't match rules, try again.", PrintType.INFO);
             }
             // cast user input
             try {
                 castedUserInput = (T) cast(userInput, field, type);
             } catch (TypeCastException e) {
-                println(e.getMessage(), PrintType.ERROR);
-                flag = true;
+                outputter.println(e.getMessage(), PrintType.ERROR);
+                flag = outputter.isVerbose();
             } catch (NotFoundEnumTypeException e) {
                 if (!flag) return null;
             }
@@ -125,15 +135,15 @@ public class ObjectReaderImpl implements ObjectReader {
         return castedUserInput;
     }
 
-    private void print(String message, PrintType type) {
-        if (INTERACTIVE_MODE) {
-            type.type.print(message);
-        }
-    }
-
-    private void println(String message, PrintType type) {
-        print(message + '\n', type);
-    }
+//    private void print(String message, PrintType type) {
+//        if (INTERACTIVE_MODE) {
+//            type.type.print(message);
+//        }
+//    }
+//
+//    private void println(String message, PrintType type) {
+//        print(message + '\n', type);
+//    }
 
     private String formMessage(List<Rule> rules, Field field) {
         StringBuilder ruleMessage = new StringBuilder();

@@ -20,4 +20,12 @@ public class Application {
         context.setFactory(factory);
         return context;
     }
+
+    public static ApplicationContext run(String packageToScan) {
+        return run(packageToScan, null );
+    }
+
+    public static ApplicationContext run() {
+        return run("", null);
+    }
 }

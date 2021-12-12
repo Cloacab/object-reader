@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,11 +13,13 @@ public class JavaConfig implements Config {
 
     @Getter
     private final Reflections scanner;
-    private final Map<Class, Class> ifc2ImplClass;
+    private final Map<Class, Class> ifc2ImplClass = new HashMap<>();
 
     public JavaConfig(String packageToScan, Map<Class, Class> ifc2ImplClass) {
         this.scanner = new Reflections(packageToScan, new SubTypesScanner(false));
-        this.ifc2ImplClass = ifc2ImplClass;
+        if (ifc2ImplClass != null) {
+            this.ifc2ImplClass.putAll(ifc2ImplClass);
+        }
     }
 
     @SneakyThrows
