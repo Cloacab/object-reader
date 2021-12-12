@@ -8,6 +8,30 @@
     <artifactId>ObjectReader</artifactId>
     <version>0.0.1</version>
 
+    <description>
+        This is a simple context for your application that implements dependency
+        injection approach.
+        DO NOT USE IN PRODUCTION.
+    </description>
+    <url>
+        https://github.com/Cloacab
+    </url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+
+    <developers>
+        <developer>
+            <name>Egor Martiushev</name>
+            <email>martiusheved@gmail.com</email>
+        </developer>
+    </developers>
+
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
