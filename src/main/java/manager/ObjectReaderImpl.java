@@ -177,15 +177,15 @@ public class ObjectReaderImpl implements ObjectReader {
             type = Wrapper.wrap(type);
         }
 
-        if (type.isEnum()) {
-            return fromStringToEnum(userInput, type);
-        } else {
-            Convertor<?> converter = factory.getConvertor(type);
-            try{
+        try{
+            if (type.isEnum()) {
+                return fromStringToEnum(userInput, type);
+            } else {
+                Convertor<?> converter = factory.getConvertor(type);
                 return converter.convert(userInput, type);
-            } catch (Exception e) {
-                throw new TypeCastException(String.format("Mismatching field type and input type. Must be: %s", field.getType().getSimpleName()));
             }
+        } catch (Exception e) {
+            throw new TypeCastException(String.format("Mismatching field type and input type. Must be: %s", field.getType().getSimpleName()));
         }
     }
 

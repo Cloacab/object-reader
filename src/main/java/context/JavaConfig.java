@@ -27,7 +27,7 @@ public class JavaConfig implements Config {
     public <T> Class<? extends T> getImplClass(Class<T> ifc) {
         return ifc2ImplClass.computeIfAbsent(ifc, aClass -> {
             Set<Class<? extends T>> types = scanner.getSubTypesOf(ifc);
-            System.out.println(types);
+//            System.out.println(types);
             if (types.size()!=1) {
                 throw new RuntimeException("Ifc should have only 1 implementation, got: " + types.size() + ". (working on that)");
             }
