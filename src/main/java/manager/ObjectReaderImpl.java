@@ -24,7 +24,9 @@ public class ObjectReaderImpl implements ObjectReader {
     @InjectByType
     private ObjectCreator creator;
     @InjectByType
-    private Outputter outputter;
+    private Outputter out;
+    @InjectByType
+    private Validator validator;
 
     @Setter
     private Scanner scanner = new Scanner(System.in);
@@ -52,7 +54,7 @@ public class ObjectReaderImpl implements ObjectReader {
         try {
             object = creator.create(constructor, args.toArray());
         } catch (IllegalArgumentException e) {
-            outputter.println(e.getMessage(), PrintType.ERROR);
+            out.println(e.getMessage(), PrintType.ERROR);
         }
         return object;
     }
@@ -104,33 +106,43 @@ public class ObjectReaderImpl implements ObjectReader {
         T castedUserInput = null;
 
         do {
-            outputter.println(message, PrintType.INFO);
+            out.println(message, PrintType.INFO);
             userInput = scanner.nextLine();
 
+            // wrap validation in separate class
+//            try {
+//                if (validate(rules, userInput)) {
+//                    flag = false;
+////                    if (!outputter.isVerbose()) {
+////
+////                    }
+//                }
+//            } catch (NumberFormatException e) {
+//                outputter.println(e.getMessage(), PrintType.ERROR);
+//                flag = true;
+//            }
+
             try {
-                if (validate(rules, userInput)) {
-                    flag = false;
-//                    if (!outputter.isVerbose()) {
-//
-//                    }
-                }
-            } catch (NumberFormatException e) {
-                outputter.println(e.getMessage(), PrintType.ERROR);
-                flag = true;
+                flag = validator.validate(userInput, field);
+            } catch (Exception e) {
+//                e.printStackTrace();
+                out.println(e.getMessage(), PrintType.ERROR);
+                flag = false;
             }
+
             if (flag) {
-                outputter.println("Seems like your input doesn't match rules, try again.", PrintType.INFO);
+                out.println("Seems like your input doesn't match rules, try again.", PrintType.INFO);
             }
             // cast user input
             try {
                 castedUserInput = (T) cast(userInput, field, type);
             } catch (TypeCastException e) {
-                outputter.println(e.getMessage(), PrintType.ERROR);
-                flag = outputter.isVerbose();
+                out.println(e.getMessage(), PrintType.ERROR);
+                flag = out.isVerbose();
             } catch (NotFoundEnumTypeException e) {
                 if (!flag) return null;
             }
-        } while (flag && !userInput.trim().equalsIgnoreCase("break"));
+        } while (flag);
 
         return castedUserInput;
     }

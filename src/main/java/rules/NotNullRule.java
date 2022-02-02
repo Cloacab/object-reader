@@ -6,6 +6,6 @@ public class NotNullRule extends Rule {
     }
     @Override
     public boolean validateRule(String value) {
-        return !value.isEmpty() && !value.isBlank();
+        return !value.trim().isEmpty();
     }
 }
