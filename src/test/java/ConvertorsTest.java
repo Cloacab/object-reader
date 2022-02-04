@@ -7,7 +7,7 @@ public class ConvertorsTest {
     public void stringToDoubleConvertorTest() {
         StringToDoubleConvertor stringToDoubleConvertor = new StringToDoubleConvertor();
         Double expected = 1.123;
-        Double actual = stringToDoubleConvertor.convert("1.123", Double.class);
+        Double actual = stringToDoubleConvertor.convert("1.123");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -15,7 +15,7 @@ public class ConvertorsTest {
     public void stringToDoubleConvertorTest2() {
         StringToDoubleConvertor stringToDoubleConvertor = new StringToDoubleConvertor();
         Double expected = 5d;
-        Double actual = stringToDoubleConvertor.convert("5", Double.class);
+        Double actual = stringToDoubleConvertor.convert("5");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -23,7 +23,7 @@ public class ConvertorsTest {
     public void stringToFloatConvertorTest() {
         StringToFloatConvertor stringToFloatConvertor = new StringToFloatConvertor();
         Float expected = 2.123f;
-        Float actual = stringToFloatConvertor.convert("2.123", Float.class);
+        Float actual = stringToFloatConvertor.convert("2.123");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -31,7 +31,7 @@ public class ConvertorsTest {
     public void stringToFloatConvertorTest2() {
         StringToFloatConvertor stringToFloatConvertor = new StringToFloatConvertor();
         Float expected = 2f;
-        Float actual = stringToFloatConvertor.convert("2", Float.class);
+        Float actual = stringToFloatConvertor.convert("2");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -39,7 +39,7 @@ public class ConvertorsTest {
     public void stringToIntConvertorTest() {
         StringToIntConvertor stringToIntConvertor = new StringToIntConvertor();
         Integer expected = 4;
-        Integer actual = stringToIntConvertor.convert("4", Integer.class);
+        Integer actual = stringToIntConvertor.convert("4");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -47,7 +47,7 @@ public class ConvertorsTest {
     public void stringToLongConvertorTest() {
         StringToLongConvertor stringToLongConvertor = new StringToLongConvertor();
         Long expected = 6L;
-        Long actual = stringToLongConvertor.convert("6", Long.class);
+        Long actual = stringToLongConvertor.convert("6");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -55,7 +55,7 @@ public class ConvertorsTest {
     public void stringToStringConvertorTest() {
         StringToStringConvertor stringToStringConvertor = new StringToStringConvertor();
         String expected = "  df";
-        String actual = stringToStringConvertor.convert("  df", String.class);
+        String actual = stringToStringConvertor.convert("  df");
         Assertions.assertEquals(expected, actual);
     }
 }

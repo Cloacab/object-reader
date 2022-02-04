@@ -15,5 +15,5 @@ public abstract class Convertor<T> {
                         .getActualTypeArguments()[0];
     }
 
-    public abstract T convert(String value, Class<T> type);
+    public abstract T convert(String value);
 }

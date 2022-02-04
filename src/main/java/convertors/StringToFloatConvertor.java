@@ -2,7 +2,7 @@ package convertors;
 
 public class StringToFloatConvertor extends Convertor<Float> {
     @Override
-    public Float convert(String value, Class<Float> type) {
+    public Float convert(String value) {
         return Float.valueOf(value);
     }
 }

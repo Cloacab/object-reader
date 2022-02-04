@@ -182,7 +182,7 @@ public class ObjectReaderImpl implements ObjectReader {
                 return fromStringToEnum(userInput, type);
             } else {
                 Convertor<?> converter = factory.getConvertor(type);
-                return converter.convert(userInput, type);
+                return converter.convert(userInput);
             }
         } catch (Exception e) {
             throw new TypeCastException(String.format("Mismatching field type and input type. Must be: %s", field.getType().getSimpleName()));

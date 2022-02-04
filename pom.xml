@@ -6,7 +6,7 @@
 
     <groupId>com.github.Cloacab</groupId>
     <artifactId>object-reader</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
 
     <description>
         This is a library to help you read objects from console with dependency injection
@@ -27,11 +27,12 @@
     <developers>
         <developer>
             <name>Egor Martiushev</name>
-            <email>martiusheved@gmail.com</email>
+            <email>martusheved@gmail.com</email>
         </developer>
     </developers>
 
     <properties>
+        <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
@@ -80,8 +81,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration> <!-- Compile java 7 compatible bytecode -->
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -111,6 +112,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M5</version>
             </plugin>
         </plugins>
     </build>

@@ -2,7 +2,7 @@ package convertors;
 
 public class StringToIntConvertor extends Convertor<Integer> {
     @Override
-    public Integer convert(String value, Class<Integer> type) {
+    public Integer convert(String value) {
         return Integer.valueOf(value);
     }
 }
